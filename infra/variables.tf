@@ -9,6 +9,10 @@ variable "resource_group_name" {
   type        = string
 }
 
+variable "storage_account_name" {
+  description = "Storage name"
+  type        = string
+}
 variable "project_name" {
   description = "Project name prefix for all resources"
   type        = string

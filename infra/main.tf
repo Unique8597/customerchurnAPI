@@ -27,8 +27,8 @@ data "azurerm_resource_group" "main" {
 # ── Container Registry (ACR) ───────────────────────────────────────────────────
 resource "azurerm_container_registry" "acr" {
   name                = "${replace(var.project_name, "-", "")}acr"
-  resource_group_name = azurerm_resource_group.main.name
-  location            = azurerm_resource_group.main.location
+  resource_group_name = data.azurerm_resource_group.main.name
+  location            = data.azurerm_resource_group.main.location
   sku                 = "Basic"
   admin_enabled       = true
 }
@@ -36,23 +36,23 @@ resource "azurerm_container_registry" "acr" {
 # ── Container App Environment ──────────────────────────────────────────────────
 resource "azurerm_log_analytics_workspace" "main" {
   name                = "${var.project_name}-logs"
-  resource_group_name = azurerm_resource_group.main.name
-  location            = azurerm_resource_group.main.location
+  resource_group_name = data.azurerm_resource_group.main.name
+  location            = data.azurerm_resource_group.main.location
   sku                 = "PerGB2018"
   retention_in_days   = 30
 }
 
 resource "azurerm_container_app_environment" "main" {
   name                       = "${var.project_name}-env"
-  resource_group_name        = azurerm_resource_group.main.name
-  location                   = azurerm_resource_group.main.location
+  resource_group_name        = data.azurerm_resource_group.main.name
+  location                   = data.azurerm_resource_group.main.location
   log_analytics_workspace_id = azurerm_log_analytics_workspace.main.id
 }
 
 # ── Container App (API) ────────────────────────────────────────────────────────
 resource "azurerm_container_app" "api" {
   name                         = "${var.project_name}-api"
-  resource_group_name          = azurerm_resource_group.main.name
+  resource_group_name          = data.azurerm_resource_group.main.name
   container_app_environment_id = azurerm_container_app_environment.main.id
   revision_mode                = "Single"
 
@@ -96,19 +96,16 @@ resource "azurerm_container_app" "api" {
 }
 
 # ── Azure Function — Storage Account ──────────────────────────────────────────
-resource "azurerm_storage_account" "function" {
-  name                     = "${replace(var.project_name, "-", "")}fnstore"
-  resource_group_name      = azurerm_resource_group.main.name
-  location                 = azurerm_resource_group.main.location
-  account_tier             = "Standard"
-  account_replication_type = "LRS"
+data "azurerm_storage_account" "function" {
+  name                = var.storage_account_name
+  resource_group_name = data.azurerm_resource_group.main.name
 }
 
 # ── Azure Function — App Service Plan (Linux) ──────────────────────────────────
 resource "azurerm_service_plan" "function" {
   name                = "${var.project_name}-fn-plan"
-  resource_group_name = azurerm_resource_group.main.name
-  location            = azurerm_resource_group.main.location
+  resource_group_name = data.azurerm_resource_group.main.name
+  location            = data.azurerm_resource_group.main.location
   os_type             = "Linux"
   sku_name            = "Y1"   # Consumption plan
 }
@@ -116,10 +113,10 @@ resource "azurerm_service_plan" "function" {
 # ── Azure Function App ─────────────────────────────────────────────────────────
 resource "azurerm_linux_function_app" "event_listener" {
   name                       = "${var.project_name}-event-listener"
-  resource_group_name        = azurerm_resource_group.main.name
-  location                   = azurerm_resource_group.main.location
-  storage_account_name       = azurerm_storage_account.function.name
-  storage_account_access_key = azurerm_storage_account.function.primary_access_key
+  resource_group_name        = data.azurerm_resource_group.main.name
+  location                   = data.azurerm_resource_group.main.location
+  storage_account_name       = data.azurerm_storage_account.function.name
+  storage_account_access_key = data.azurerm_storage_account.function.primary_access_key
   service_plan_id            = azurerm_service_plan.function.id
 
   site_config {
