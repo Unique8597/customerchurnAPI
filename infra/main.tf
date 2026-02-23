@@ -127,6 +127,7 @@ resource "azurerm_linux_function_app" "event_listener" {
 
   app_settings = {
     FUNCTIONS_WORKER_RUNTIME = "python"
+    FUNCTIONS_EXTENSION_VERSION  = "~4" 
     GITHUB_TOKEN             = var.github_token
     GITHUB_OWNER             = var.github_owner
     GITHUB_REPO              = var.github_repo

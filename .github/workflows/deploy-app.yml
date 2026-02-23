@@ -96,8 +96,7 @@ jobs:
     name: Subscribe Event Grid to Model Registry
     runs-on: ubuntu-latest
     needs: [changes, deploy-function]
-    if: |
-      needs.changes.outputs.event_listener == 'true'
+    if: needs.changes.outputs.event_listener == 'true'
 
     steps:
       - name: Login to Azure
@@ -105,18 +104,28 @@ jobs:
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
 
-      - name: Get Function App ID
-        id: funcid
+      - name: Get system key and build webhook URL
+        id: webhook
         uses: azure/cli@v2
         with:
           azcliversion: latest
           inlineScript: |
-            FUNC_ID=$(az functionapp show \
+            # ── Get the master key first ───────────────────────────────────────
+            MASTER_KEY=$(az functionapp keys list \
               --name ${{ secrets.FUNCTION_APP_NAME }} \
               --resource-group ${{ secrets.AZURE_RESOURCE_GROUP }} \
-              --query id \
+              --query masterKey \
               --output tsv)
-            echo "func_id=$FUNC_ID" >> $GITHUB_OUTPUT
+
+            # ── Use master key to get the eventgrid system key ─────────────────
+            SYSTEM_KEY=$(curl -s \
+              "https://${{ secrets.FUNCTION_APP_NAME }}.azurewebsites.net/admin/host/systemkeys/eventgrid_extension?code=$MASTER_KEY" \
+              | python3 -c "import sys,json; print(json.load(sys.stdin)['value'])")
+
+            # ── Build the webhook URL ──────────────────────────────────────────
+            WEBHOOK_URL="https://${{ secrets.FUNCTION_APP_NAME }}.azurewebsites.net/runtime/webhooks/eventgrid?functionName=model_registered_handler&code=$SYSTEM_KEY"
+
+            echo "webhook_url=$WEBHOOK_URL" >> $GITHUB_OUTPUT
 
       - name: Create Event Grid Subscription
         uses: azure/cli@v2
@@ -135,8 +144,8 @@ jobs:
                 --name customerchurnapi-model-registered-sub \
                 --source-resource-id ${{ secrets.AML_WORKSPACE_RESOURCE_ID }} \
                 --included-event-types Microsoft.MachineLearningServices.ModelRegistered \
-                --endpoint-type azurefunction \
-                --endpoint ${{ steps.funcid.outputs.func_id }}/functions/model_registered_handler \
+                --endpoint ${{ steps.webhook.outputs.webhook_url }} \
+                --endpoint-type webhook \
                 --max-delivery-attempts 3 \
                 --event-ttl 1440
             else
