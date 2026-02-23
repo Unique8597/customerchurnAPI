@@ -18,11 +18,6 @@ variable "project_name" {
   type        = string
 }
 
-variable "aml_workspace_id" {
-  description = "Azure ML workspace resource ID (for Event Grid source)"
-  type        = string
-}
-
 variable "github_token" {
   description = "GitHub PAT for the Azure Function to dispatch workflows"
   type        = string
