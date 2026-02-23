@@ -50,7 +50,60 @@ jobs:
           package: ./event_listener
           scm-do-build-during-deployment: true
           enable-oryx-build: true
+  # ── Create Event Grid subscription AFTER function is deployed ──────────────
+  setup-event-grid:
+    name: Subscribe Event Grid to Model Registry
+    runs-on: ubuntu-latest
+    needs: deploy-function       # waits for function code to be deployed first
+    if: |
+      github.event_name == 'push' &&
+      contains(join(github.event.commits.*.modified, ','), 'event_listener/')
 
+    steps:
+      - name: Login to Azure
+        uses: azure/login@v2
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+      - name: Get Function App ID
+        id: funcid
+        uses: azure/cli@v2
+        with:
+          azcliversion: latest
+          inlineScript: |
+            FUNC_ID=$(az functionapp show \
+              --name ${{ secrets.FUNCTION_APP_NAME }} \
+              --resource-group ${{ secrets.AZURE_RESOURCE_GROUP }} \
+              --query id \
+              --output tsv)
+            echo "func_id=$FUNC_ID" >> $GITHUB_OUTPUT
+
+      - name: Create Event Grid Subscription
+        uses: azure/cli@v2
+        with:
+          azcliversion: latest
+          inlineScript: |
+            # Check if subscription already exists — skip if it does
+            EXISTING=$(az eventgrid event-subscription show \
+              --name customerchurnapi-model-registered-sub \
+              --source-resource-id ${{ secrets.AML_WORKSPACE_RESOURCE_ID }} \
+              --query name \
+              --output tsv 2>/dev/null || echo "")
+
+            if [ -z "$EXISTING" ]; then
+              echo "Creating Event Grid subscription..."
+              az eventgrid event-subscription create \
+                --name customerchurnapi-model-registered-sub \
+                --source-resource-id ${{ secrets.AML_WORKSPACE_RESOURCE_ID }} \
+                --included-event-types Microsoft.MachineLearningServices.ModelRegistered \
+                --endpoint-type azurefunction \
+                --endpoint ${{ steps.funcid.outputs.func_id }}/functions/model_registered_handler \
+                --max-delivery-attempts 3 \
+                --event-ttl 1440
+            else
+              echo "Event Grid subscription already exists, skipping..."
+            fi
+            
   # ── Build & Push Docker Image ───────────────────────────────────────────────
   build-image:
     name: Build & Push to ACR

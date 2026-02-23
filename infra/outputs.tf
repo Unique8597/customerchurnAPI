@@ -30,7 +30,3 @@ output "function_app_name" {
   value       = azurerm_linux_function_app.event_listener.name
 }
 
-output "event_subscription_name" {
-  description = "Event Grid subscription name"
-  value       = azurerm_eventgrid_event_subscription.model_registered.name
-}

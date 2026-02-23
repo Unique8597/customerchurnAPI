@@ -134,25 +134,3 @@ resource "azurerm_linux_function_app" "event_listener" {
     GITHUB_REF               = "main"
   }
 }
-
-# ── Event Grid — Subscribe to AML Model Registry events ───────────────────────
-resource "azurerm_eventgrid_event_subscription" "model_registered" {
-  name  = "${var.project_name}-model-registered-sub"
-  scope = var.aml_workspace_id     # AML workspace resource ID
-
-  included_event_types = [
-    "Microsoft.MachineLearningServices.ModelRegistered"
-  ]
-
-  azure_function_endpoint {
-    function_id = "${azurerm_linux_function_app.event_listener.id}/functions/model_registered_handler"
-
-    max_events_per_batch              = 1
-    preferred_batch_size_in_kilobytes = 64
-  }
-
-  retry_policy {
-    max_delivery_attempts = 3
-    event_time_to_live    = 1440   # 24 hours in minutes
-  }
-}
