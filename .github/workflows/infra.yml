@@ -1,0 +1,52 @@
+name: Provision Infrastructure
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "infra/**"          # only runs when Terraform files change
+
+  workflow_dispatch:        # manual trigger for first-time setup
+
+env:
+  TF_WORKING_DIR: ./infra
+  ARM_CLIENT_ID:       ${{ secrets.ARM_CLIENT_ID }}
+  ARM_CLIENT_SECRET:   ${{ secrets.ARM_CLIENT_SECRET }}
+  ARM_SUBSCRIPTION_ID: ${{ secrets.ARM_SUBSCRIPTION_ID }}
+  ARM_TENANT_ID:       ${{ secrets.ARM_TENANT_ID }}
+  
+  # Needed for the azurerm backend to authenticate
+  ARM_ACCESS_KEY: ${{ secrets.TF_STORAGE_ACCESS_KEY }}
+
+jobs:
+  terraform:
+    name: Terraform Apply
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.7.0
+
+      - name: Terraform Init
+        working-directory: ${{ env.TF_WORKING_DIR }}
+        run: terraform init
+
+      - name: Terraform Validate
+        working-directory: ${{ env.TF_WORKING_DIR }}
+        run: terraform validate
+
+      - name: Terraform Plan
+        working-directory: ${{ env.TF_WORKING_DIR }}
+        run: |
+          terraform plan \
+            -var="github_token=${{ secrets.GH_PAT }}" \
+            -out=tfplan
+
+      - name: Terraform Apply
+        working-directory: ${{ env.TF_WORKING_DIR }}
+        run: terraform apply -auto-approve tfplan
