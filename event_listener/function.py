@@ -6,6 +6,7 @@ import os
 
 app = func.FunctionApp()
 
+@app.function_name(name="model_registered_handler")
 @app.event_grid_trigger(arg_name="event")
 def model_registered_handler(event: func.EventGridEvent):
     """
