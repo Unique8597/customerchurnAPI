@@ -29,7 +29,7 @@ jobs:
     runs-on: ubuntu-latest
     if: |
       github.event_name == 'push' &&
-      contains(join(github.event.commits.*.modified, ','), 'event_listener/')
+      contains(join(github.event.commits.*.modified, ','), 'event-listener/')
 
     steps:
       - uses: actions/checkout@v4
@@ -50,6 +50,7 @@ jobs:
           package: ./event_listener
           scm-do-build-during-deployment: true
           enable-oryx-build: true
+
   # ── Create Event Grid subscription AFTER function is deployed ──────────────
   setup-event-grid:
     name: Subscribe Event Grid to Model Registry
@@ -57,7 +58,7 @@ jobs:
     needs: deploy-function       # waits for function code to be deployed first
     if: |
       github.event_name == 'push' &&
-      contains(join(github.event.commits.*.modified, ','), 'event_listener/')
+      contains(join(github.event.commits.*.modified, ','), 'event-listener/')
 
     steps:
       - name: Login to Azure
