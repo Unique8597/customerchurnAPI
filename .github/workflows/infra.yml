@@ -50,3 +50,23 @@ jobs:
       - name: Terraform Apply
         working-directory: ${{ env.TF_WORKING_DIR }}
         run: terraform apply -auto-approve tfplan
+
+      - name: Push Terraform outputs to GitHub Secrets
+        working-directory: ${{ env.TF_WORKING_DIR }}
+        env:
+          GH_TOKEN: ${{ secrets.GH_PAT }}   # needs repo + secrets scope
+        run: |
+          gh secret set ACR_LOGIN_SERVER \
+            --body "$(terraform output -raw acr_login_server)"
+
+          gh secret set ACR_USERNAME \
+            --body "$(terraform output -raw acr_username)"
+
+          gh secret set ACR_PASSWORD \
+            --body "$(terraform output -raw acr_password)"
+
+          gh secret set FUNCTION_APP_NAME \
+            --body "$(terraform output -raw function_app_name)"
+
+          gh secret set CONTAINER_APP_NAME \
+            --body "$(terraform output -raw container_app_name)"
