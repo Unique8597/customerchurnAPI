@@ -16,7 +16,7 @@ env:
   ARM_TENANT_ID:       ${{ secrets.ARM_TENANT_ID }}
   
   # Needed for the azurerm backend to authenticate
-  ARM_ACCESS_KEY: ${{ secrets.TF_STORAGE_ACCESS_KEY }}
+  ARM_ACCESS_KEY: ${{ secrets.ARM_ACCESS_KEY }}
 
 jobs:
   terraform:
