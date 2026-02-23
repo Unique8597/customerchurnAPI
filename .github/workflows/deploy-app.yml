@@ -5,7 +5,7 @@ on:
     branches: [main]
     paths:
       - "app/**"
-      - "event_listener/**"
+      - "event-listener/**"
 
   workflow_dispatch:
     inputs:
@@ -103,7 +103,7 @@ jobs:
             else
               echo "Event Grid subscription already exists, skipping..."
             fi
-            
+
   # ── Build & Push Docker Image ───────────────────────────────────────────────
   build-image:
     name: Build & Push to ACR
