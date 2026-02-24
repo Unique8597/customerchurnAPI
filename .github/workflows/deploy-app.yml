@@ -5,7 +5,7 @@ on:
     branches: [main]
     paths:
       - "app/**"
-      - "event-trigger/**"    # ← underscore, matches your actual folder
+      - "event_trigger/**"    # ← underscore, matches your actual folder
 
   workflow_dispatch:
     inputs:
@@ -31,7 +31,7 @@ jobs:
     if: github.event_name == 'push'
     outputs:
       app:              ${{ steps.filter.outputs.app }}
-      event_listener:   ${{ steps.filter.outputs.event_listener }}
+      event_tigger:   ${{ steps.filter.outputs.event_trigger }}
 
     steps:
       - uses: actions/checkout@v4
@@ -43,15 +43,15 @@ jobs:
           filters: |
             app:
               - "app/**"
-            event-trigger:
-              - "event-trigger/**"
+            event_trigger:
+              - "event_trigger/**"
 
   # ── Deploy Azure Function ───────────────────────────────────────────────────
   deploy-function:
     name: Deploy Event Listener
     runs-on: ubuntu-latest
     needs: changes
-    if: needs.changes.outputs.event_listener == 'true'
+    if: needs.changes.outputs.event_tigger == 'true'
 
     steps:
       - uses: actions/checkout@v4
