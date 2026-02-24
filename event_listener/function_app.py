@@ -33,7 +33,7 @@ def _trigger_github_workflow(model_name: str, model_version: str):
     token       = os.environ["GITHUB_TOKEN"]
     owner       = os.environ["GITHUB_OWNER"]
     repo        = os.environ["GITHUB_REPO"]
-    workflow_id = os.environ["GITHUB_WORKFLOW_ID"]   # e.g. "deploy-api.yml"
+    workflow_id = os.environ["GITHUB_WORKFLOW_ID"]
     ref         = os.environ.get("GITHUB_REF", "main")
 
     url = f"https://api.github.com/repos/{owner}/{repo}/actions/workflows/{workflow_id}/dispatches"
