@@ -13,6 +13,12 @@ variable "storage_account_name" {
   description = "Storage name"
   type        = string
 }
+
+variable "aml_workspace_id" {
+  description = "Azure ML workspace ID"
+  type        = string
+}
+
 variable "project_name" {
   description = "Project name prefix for all resources"
   type        = string
