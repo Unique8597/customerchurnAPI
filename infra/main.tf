@@ -76,7 +76,7 @@ resource "azurerm_container_app" "api" {
 
       env {
         name  = "MODEL_NAME"
-        value = "placeholder"   # updated dynamically by deploy-api.yml
+        value = "placeholder"   
       }
       env {
         name  = "MODEL_VERSION"
@@ -112,7 +112,7 @@ resource "azurerm_service_plan" "function" {
 
 # ── Azure Function App ─────────────────────────────────────────────────────────
 resource "azurerm_linux_function_app" "event_listener" {
-  name                       = "${var.project_name}-event-listener"
+  name                       = "${var.project_name}-event-listeners"
   resource_group_name        = data.azurerm_resource_group.main.name
   location                   = data.azurerm_resource_group.main.location
   storage_account_name       = data.azurerm_storage_account.function.name
