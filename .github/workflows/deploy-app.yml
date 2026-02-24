@@ -65,31 +65,18 @@ jobs:
         shell: bash
         run: |
           python -m pip install --upgrade pip
-          pip install -r event_listener/requirements.txt \
-            --target="event_listener/.python_packages/lib/site-packages"
+          pip install -r event_listener/requirements.txt
 
       - name: Login to Azure
         uses: azure/login@v2
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
 
-      - name: Zip function package
+      - name: Deploy function
         shell: bash
         run: |
           cd event_listener
-          zip -r ../function.zip .
-          cd ..
-
-      - name: Deploy via Azure CLI
-        uses: azure/cli@v2
-        with:
-          azcliversion: latest
-          inlineScript: |
-            az functionapp deployment source config-zip \
-              --name ${{ secrets.FUNCTION_APP_NAME }} \
-              --resource-group ${{ secrets.AZURE_RESOURCE_GROUP }} \
-              --src function.zip \
-              --build-remote true
+          func azure functionapp publish ${{ secrets.FUNCTION_APP_NAME }}
               
   # ── Create Event Grid subscription AFTER function is deployed ──────────────
   setup-event-grid:
