@@ -19,7 +19,7 @@ variable "project_name" {
 }
 
 variable "github_token" {
-  description = "GitHub PAT for the Azure Function to dispatch workflows"
+  description = "GitHub PAT for the Azure Function to dispatch workflow"
   type        = string
   sensitive   = true
 }
