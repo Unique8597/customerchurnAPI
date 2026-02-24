@@ -5,7 +5,7 @@ on:
     branches: [main]
     paths:
       - "app/**"
-      - "event_listener/**"    # ← underscore, matches your actual folder
+      - "event-trigger/**"    # ← underscore, matches your actual folder
 
   workflow_dispatch:
     inputs:
@@ -43,8 +43,8 @@ jobs:
           filters: |
             app:
               - "app/**"
-            event_listener:
-              - "event_listener/**"
+            event-trigger:
+              - "event-trigger/**"
 
   # ── Deploy Azure Function ───────────────────────────────────────────────────
   deploy-function:
@@ -81,8 +81,16 @@ jobs:
         shell: bash
         run: |
           cd event_listener
-          func init . --python
-          func azure functionapp publish ${{ secrets.FUNCTION_APP_NAME }}
+
+          # Zip contents (not the folder itself)
+          zip -r ../function.zip .
+
+          # Deploy
+          az functionapp deployment source config-zip \
+            --name ${{ secrets.FUNCTION_APP_NAME }} \
+            --resource-group ${{ secrets.AZURE_RESOURCE_GROUP }} \
+            --src ../function.zip \
+            --build-remote true
               
   # ── Create Event Grid subscription AFTER function is deployed ──────────────
   setup-event-grid:
@@ -116,7 +124,7 @@ jobs:
               | python3 -c "import sys,json; print(json.load(sys.stdin)['value'])")
 
             # ── Build the webhook URL ──────────────────────────────────────────
-            WEBHOOK_URL="https://${{ secrets.FUNCTION_APP_NAME }}.azurewebsites.net/runtime/webhooks/eventgrid?functionName=model_registered_handler&code=$SYSTEM_KEY"
+            WEBHOOK_URL="https://${{ secrets.FUNCTION_APP_NAME }}.azurewebsites.net/runtime/webhooks/eventgrid?functionName=OnModelRegistered&code=$SYSTEM_KEY"
 
             echo "webhook_url=$WEBHOOK_URL" >> $GITHUB_OUTPUT
 

@@ -1,20 +1,20 @@
 import azure.functions as func
-import urllib.request
-import os
 import json
 import logging
+import urllib
+import os
 
 app = func.FunctionApp()
 
 @app.event_grid_trigger(arg_name="azeventgrid")
-def model_registered_handler(event: func.EventGridEvent):
+def OnModelRegistered(azeventgrid: func.EventGridEvent):
     """
     Triggered when Azure ML fires a 'Microsoft.MachineLearningServices.ModelRgistered' event.
     Dispatches the API deployment GitHub Action workflow.
     """
     logging.info("Model registry event received.")
 
-    event_data = event.get_json()
+    event_data = azeventgrid.get_json()
     model_name    = event_data.get("modelName", "unknown")
     model_version = event_data.get("modelVersion", "unknown")
 
