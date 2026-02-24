@@ -60,7 +60,7 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: "3.11"
-          
+
       - name: Install Function Core Tools
         run: |
           sudo apt-get update
@@ -81,6 +81,7 @@ jobs:
         shell: bash
         run: |
           cd event_listener
+          func init . --python
           func azure functionapp publish ${{ secrets.FUNCTION_APP_NAME }}
               
   # ── Create Event Grid subscription AFTER function is deployed ──────────────
