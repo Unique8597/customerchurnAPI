@@ -50,7 +50,7 @@ jobs:
         run: |
           docker build \
             --build-arg MODEL_NAME=${{ inputs.model_name || 'customerchurnmodel' }} \
-            --build-arg MODEL_VERSION=${{ inputs.model_version || '1' }} \
+            --build-arg MODEL_VERSION=${{ inputs.model_version || '2' }} \
             --build-arg ARM_TENANT_ID=${{ secrets.ARM_TENANT_ID }} \
             --build-arg ARM_CLIENT_ID=${{ secrets.ARM_CLIENT_ID }} \
             --build-arg ARM_CLIENT_SECRET=${{ secrets.ARM_CLIENT_SECRET }} \
@@ -82,9 +82,13 @@ jobs:
           azcliversion: latest
           inlineScript: |
             az containerapp update \
+              az containerapp update \
               --name ${{ secrets.CONTAINER_APP_NAME }} \
               --resource-group ${{ secrets.AZURE_RESOURCE_GROUP }} \
-              --image ${{ needs.build-image.outputs.image_tag }}
+              --image ${{ needs.build-image.outputs.image_tag }} \
+              --registry-server ${{ secrets.ACR_LOGIN_SERVER }} \
+              --registry-username ${{ secrets.ACR_USERNAME }} \
+              --registry-password ${{ secrets.ACR_PASSWORD }}
 
       - name: Update model env vars (workflow_dispatch only)
         if: github.event_name == 'workflow_dispatch'
