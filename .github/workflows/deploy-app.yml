@@ -49,7 +49,7 @@ jobs:
       - name: Build & Push image with model baked in
         run: |
           docker build \
-            --build-arg MODEL_NAME=${{ inputs.model_name || 'my-model' }} \
+            --build-arg MODEL_NAME=${{ inputs.model_name || 'customerchurnmodel' }} \
             --build-arg MODEL_VERSION=${{ inputs.model_version || '1' }} \
             --build-arg ARM_TENANT_ID=${{ secrets.ARM_TENANT_ID }} \
             --build-arg ARM_CLIENT_ID=${{ secrets.ARM_CLIENT_ID }} \

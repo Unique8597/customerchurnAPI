@@ -1,13 +1,13 @@
 import os
-import joblib
+import mlflow
 from fastapi import FastAPI
 from pydantic import BaseModel
 
 app = FastAPI()
 
 # Load the .joblib model baked into the image at build time
-MODEL_PATH = os.path.join(os.path.dirname(__file__), "model", "model.joblib")
-model = joblib.load(MODEL_PATH)
+MODEL_PATH = os.path.join(os.path.dirname(__file__), "model")
+model = mlflow.pyfunc.load_model(MODEL_PATH)
 
 
 class PredictRequest(BaseModel):
