@@ -86,9 +86,6 @@ jobs:
               --name ${{ secrets.CONTAINER_APP_NAME }} \
               --resource-group ${{ secrets.AZURE_RESOURCE_GROUP }} \
               --image ${{ secrets.ACR_LOGIN_SERVER }}/customerchurnapi-api:${{ needs.build-image.outputs.image_tag }} \
-              --registry-server ${{ secrets.ACR_LOGIN_SERVER }} \
-              --registry-username ${{ secrets.ACR_USERNAME }} \
-              --registry-password ${{ secrets.ACR_PASSWORD }}
 
       - name: Update model env vars (workflow_dispatch only)
         if: github.event_name == 'workflow_dispatch'
