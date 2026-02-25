@@ -82,7 +82,6 @@ jobs:
           azcliversion: latest
           inlineScript: |
             az containerapp update \
-              az containerapp update \
               --name ${{ secrets.CONTAINER_APP_NAME }} \
               --resource-group ${{ secrets.AZURE_RESOURCE_GROUP }} \
               --image ${{ secrets.ACR_LOGIN_SERVER }}/customerchurnapi-api:${{ needs.build-image.outputs.image_tag }} \
