@@ -8,7 +8,8 @@ app = FastAPI()
 # Load the .joblib model baked into the image at build time
 MODEL_BASE = os.path.join(os.path.dirname(__file__), "model")
 model_folder = next(os.scandir(MODEL_BASE)).name
-MODEL_PATH   = os.path.join(MODEL_BASE, model_folder)
+MODEL_PATH   = os.path.join(MODEL_BASE, model_folder, "model/")
+
 model = mlflow.pyfunc.load_model(MODEL_PATH)
 
 

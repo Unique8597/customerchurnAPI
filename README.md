@@ -1,5 +1,7 @@
 # customerchurnAPI
-az ml model list \
-  --workspace-name churnprediction12 \
+az ml model download \
+  --name customerchurnmodel\
+  --version 2 \
+  --download-path "./model" \
   --resource-group CustomerChurnProject \
-  --output table
+  --workspace-name churnprediction12
